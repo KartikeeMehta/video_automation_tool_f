@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Loader2, Calendar, Instagram, Youtube, CheckCircle2, Repeat, ArrowLeft } from 'lucide-react';
+import { Calendar, Instagram, Youtube, Loader2, CheckCircle2, Clock, ArrowLeft } from 'lucide-react';
 
 interface VideoData {
   id: string;
@@ -24,7 +24,8 @@ export default function SchedulePost() {
   // Scheduling State
   const [startDate, setStartDate] = useState('');
   const [frequency, setFrequency] = useState('once'); // 'once', 'daily', 'weekly', 'monthly'
-  const [endDate, setEndDate] = useState('');
+  const [endDate] = useState('');
+
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,12 +43,26 @@ export default function SchedulePost() {
         setVideos(data);
         if (preSelectedVideoId) {
             const found = data.find(v => v.id === preSelectedVideoId);
-            if (found) setSelectedVideo(found);
+            if (found) {
+                 setSelectedVideo(found);
+                 // Auto-Fill Caption
+                 setCaption(found.title + (found.topic ? ` - ${found.topic}` : ''));
+                 setHashtags(found.topic ? `#${found.topic.replace(/\s/g, '')} #viral #reels` : '#viral');
+            }
             else if (data.length > 0) setSelectedVideo(data[0]);
         } else if (data.length > 0) {
             setSelectedVideo(data[0]);
         }
     }
+
+    // Set Default Time
+    const defaultTime = localStorage.getItem('default_schedule_time') || '10:00';
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const [hours, mins] = defaultTime.split(':');
+    tomorrow.setHours(parseInt(hours), parseInt(mins));
+    setStartDate(tomorrow.toISOString().slice(0, 16));
+    setPlatforms(['instagram', 'youtube']); // Default all on?
   };
 
   const togglePlatform = (p: string) => {
@@ -82,16 +97,16 @@ export default function SchedulePost() {
       return dates;
   };
 
-  const projectedDates = getProjectedDates();
+  // const projectedDates = getProjectedDates();
 
-  const handleSchedule = async (e: React.FormEvent) => {
+  const handleSchedule = async (e: React.FormEvent | React.MouseEvent, postNow: boolean = false) => {
     e.preventDefault();
-    if (!selectedVideo || platforms.length === 0 || !startDate || !user) {
+    if (!selectedVideo || platforms.length === 0 || (!startDate && !postNow) || !user) {
         setError("Please fill in all fields.");
         return;
     }
 
-    if (frequency !== 'once' && !endDate) {
+    if (!postNow && frequency !== 'once' && !endDate) {
         setError("Please select an end date for recurring posts.");
         return;
     }
@@ -100,17 +115,23 @@ export default function SchedulePost() {
     setError(null);
 
     try {
-        const datesToSchedule = getProjectedDates();
+        let datesToSchedule: Date[] = [];
+
+        if (postNow) {
+            datesToSchedule = [new Date()];
+        } else {
+            datesToSchedule = getProjectedDates();
+        }
         
         // Prepare rows for batch insert
         const rows = datesToSchedule.map(date => ({
             user_id: user.id,
             video_id: selectedVideo.id,
-            platforms: platforms, // Auto-converted to JSONB by Supabase JS if passed as array? No, simpler to pass directly or verify types. Supabase JS handles arrays for JSON types usually.
+            platforms: platforms, 
             caption,
             hashtags,
             scheduled_time: date.toISOString(),
-            status: 'scheduled'
+            status: postNow ? 'ready' : 'scheduled' // 'ready' for immediate pickup (hypothetically) or just 'scheduled' with past time
         }));
 
         console.log('Scheduling Posts:', rows);
@@ -176,9 +197,9 @@ export default function SchedulePost() {
                     )}
                 </div>
 
-                {/* 2. Platforms */}
+                {/* 2. Platforms - Auto selected or defaults? Let's keep manual for control but default to all defined */}
                 <div className="space-y-3">
-                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">2. Choose Platforms</label>
+                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Target Platforms</label>
                     <div className="flex gap-4">
                         <PlatformButton 
                             label="Instagram" 
@@ -201,43 +222,39 @@ export default function SchedulePost() {
                     </div>
                 </div>
 
-                {/* 3. Details */}
+                {/* 3. Details (Auto-filled) */}
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">3. Caption</label>
+                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex justify-between">
+                            <span>Caption & Hashtags (Auto-Generated)</span>
+                            <span className="text-primary-400 text-[10px] cursor-pointer hover:underline" onClick={() => setCaption(selectedVideo?.title + ' ' + (selectedVideo?.topic ? `#${selectedVideo.topic.replace(/\s/g, '')}` : ''))}>Regenerate</span>
+                        </label>
                         <textarea 
                             value={caption}
                             onChange={(e) => setCaption(e.target.value)}
-                            className="input-field min-h-[100px] resize-none"
-                            placeholder="Write a catchy caption..."
+                            className="input-field min-h-[100px] resize-none bg-surface/50 text-gray-300"
+                            placeholder="Caption will be auto-generated..."
                         />
-                        <div className="flex justify-between text-xs text-gray-500">
-                             <span>{caption.length} chars</span>
-                             <span>Max 2200</span>
-                        </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Hashtags</label>
-                        <input 
+                        {/* Hashtags merged into caption for simplicity or separate field? User asked for 'choose relevent caption hashtags automatically' */}
+                         <input 
                             value={hashtags}
                             onChange={(e) => setHashtags(e.target.value)}
-                            className="input-field text-primary-300"
-                            placeholder="#viral #trending #fyp"
+                            className="input-field text-primary-300 bg-surface/50"
+                            placeholder="#hashtags"
                         />
                     </div>
                 </div>
                 
-                {/* 4. Time & Recurrence (MILESTONE 10) */}
+                {/* 4. Schedule or Post Now */}
                 <div className="space-y-4 p-5 bg-surface rounded-xl border border-gray-800">
                      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                         <Repeat className="w-4 h-4 text-primary-500" />    
-                         4. Schedule & Repeat
+                         <Clock className="w-4 h-4 text-primary-500" />    
+                         Timing
                      </label>
                      
                      <div className="grid grid-cols-2 gap-4">
                         <div className="relative">
-                            <label className="text-xs text-gray-500 mb-1 block">Start Date & Time</label>
+                            <label className="text-xs text-gray-500 mb-1 block">Scheduled Time</label>
                             <input 
                                 type="datetime-local" 
                                 value={startDate}
@@ -254,49 +271,38 @@ export default function SchedulePost() {
                                 onChange={(e) => setFrequency(e.target.value)}
                                 className="input-field appearance-none cursor-pointer"
                              >
-                                 <option value="once">Does not repeat</option>
+                                 <option value="once">One-time Post</option>
                                  <option value="daily">Daily</option>
                                  <option value="weekly">Weekly</option>
                                  <option value="monthly">Monthly</option>
                              </select>
                         </div>
                      </div>
-
-                     {/* End Date (Conditional) */}
-                     {frequency !== 'once' && (
-                        <div className="animate-in fade-in slide-in-from-top-2">
-                             <label className="text-xs text-gray-500 mb-1 block">End Date</label>
-                             <input 
-                                type="date" 
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                                className="input-field"
-                                min={startDate ? startDate.slice(0, 10) : new Date().toISOString().slice(0, 10)}
-                            />
-                            <div className="mt-4 p-3 bg-gray-900/50 rounded-lg border border-gray-800">
-                                <p className="text-xs text-gray-400 mb-2">Schedule Preview ({projectedDates.length} posts):</p>
-                                <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
-                                    {projectedDates.map((d, i) => (
-                                        <span key={i} className="text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded">
-                                            {d.toLocaleDateString()} {d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                     )}
                 </div>
 
                 {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20">{error}</p>}
 
-                <button 
-                    type="submit" 
-                    disabled={loading}
-                    className="btn-primary w-full py-4 flex items-center justify-center gap-2 text-lg shadow-lg shadow-primary-500/20 hover:shadow-primary-500/40 transition-all"
-                >
-                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Calendar className="w-6 h-6" />}
-                    Confirm Schedule ({projectedDates.length})
-                </button>
+                <div className="grid grid-cols-2 gap-4">
+                    <button 
+                        type="button"
+                        onClick={(e) => handleSchedule(e, true)} // Post Now
+                        disabled={loading}
+                        className="py-4 rounded-xl border border-primary-500 text-primary-400 font-bold hover:bg-primary-500/10 transition flex items-center justify-center gap-2"
+                    >
+                         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
+                         Post Now
+                    </button>
+
+                    <button 
+                        type="button"
+                        onClick={(e) => handleSchedule(e, false)} // Schedule
+                        disabled={loading}
+                        className="btn-primary py-4 rounded-xl font-bold font-lg shadow-lg shadow-primary-500/20 flex items-center justify-center gap-2"
+                    >
+                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Calendar className="w-5 h-5" />}
+                        Schedule
+                    </button>
+                </div>
             </form>
 
             {/* Right: Live Preview */}

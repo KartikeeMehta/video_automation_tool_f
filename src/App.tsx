@@ -13,6 +13,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
 import ScheduledPosts from './pages/ScheduledPosts';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/studio" element={<VideoStudio />} />
                 <Route path="/schedule" element={<SchedulePost />} />
                 <Route path="/scheduled-posts" element={<ScheduledPosts />} />
+                <Route path="/settings" element={<Settings />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/connections" element={<Connections />} />
              </Route>

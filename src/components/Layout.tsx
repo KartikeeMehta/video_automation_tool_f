@@ -1,14 +1,26 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { LogOut, Video, Calendar, BarChart, Settings, Wand2, Scissors, Menu, X, Bell, Plus, Clock } from 'lucide-react';
+import { 
+  Video, 
+  BarChart2, 
+  LogOut, 
+  Menu, 
+  X,
+  Clock,
+  Settings,
+  Wand2, // Added import
+  Scissors, // Added import
+  Calendar, // Added import
+  Bell, // Added import
+  Plus // Added import
+} from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Notification {
   id: string;
-  title: string;
-  message: string;
-  is_read: boolean;
+  message: string; // Changed from 'title' and 'message' combined
+  read: boolean; // Changed from 'is_read'
   created_at: string;
 }
 
@@ -33,7 +45,7 @@ export default function Layout() {
       const { data } = await supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(5);
       if (data) {
           setNotifications(data);
-          setUnreadCount(data.filter(n => !n.is_read).length);
+          setUnreadCount(data.filter(n => !n.read).length);
       } else {
         // Mock fallback removed as requested by "real data" prompt earlier, but keeping structure safe
         setNotifications([]);
@@ -42,9 +54,9 @@ export default function Layout() {
   };
 
   const markRead = async (id: string) => {
-      setNotifications(notifications.map(n => n.id === id ? { ...n, is_read: true } : n));
+      setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
-      await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+      await supabase.from('notifications').update({ read: true }).eq('id', id);
   };
 
   return (
@@ -78,7 +90,7 @@ export default function Layout() {
           <NavItem icon={Scissors} label="Studio Editor" onClick={() => navigate('/studio')} active={location.pathname === '/studio'} />
           <NavItem icon={Calendar} label="Schedule" onClick={() => navigate('/schedule')} active={location.pathname === '/schedule'} />
           <NavItem icon={Clock} label="Queue" onClick={() => navigate('/scheduled-posts')} active={location.pathname === '/scheduled-posts'} />
-          <NavItem icon={BarChart} label="Analytics" onClick={() => navigate('/analytics')} active={location.pathname === '/analytics'} />
+          <NavItem icon={BarChart2} label="Analytics" onClick={() => navigate('/analytics')} active={location.pathname === '/analytics'} />
           <NavItem icon={Settings} label="Connections" onClick={() => navigate('/connections')} active={location.pathname === '/connections'} />
         </nav>
 
@@ -145,12 +157,11 @@ export default function Layout() {
                                     <div 
                                         key={n.id} 
                                         onClick={() => markRead(n.id)}
-                                        className={`p-4 border-b border-gray-800/50 hover:bg-gray-800/50 cursor-pointer flex gap-3 ${!n.is_read ? 'bg-primary-500/5' : ''}`}
+                                        className={`p-4 border-b border-gray-800/50 hover:bg-gray-800/50 cursor-pointer flex gap-3 ${!n.read ? 'bg-primary-500/5' : ''}`}
                                     >
-                                        <div className={`w-2 h-2 rounded-full mt-1.5 ${!n.is_read ? 'bg-secondary-500' : 'bg-transparent'}`} />
+                                        <div className={`w-2 h-2 rounded-full mt-1.5 ${!n.read ? 'bg-secondary-500' : 'bg-transparent'}`} />
                                         <div>
-                                            <p className={`text-sm ${!n.is_read ? 'font-semibold text-white' : 'text-gray-400'}`}>{n.title}</p>
-                                            <p className="text-xs text-gray-500 mt-1">{n.message}</p>
+                                            <p className={`text-sm ${!n.read ? 'font-semibold text-white' : 'text-gray-400'}`}>{n.message}</p>
                                             <p className="text-[10px] text-gray-600 mt-2">{new Date(n.created_at).toLocaleTimeString()}</p>
                                         </div>
                                     </div>
