@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { ArrowLeft, Share2, Calendar, Eye, MessageCircle, Heart, Repeat } from 'lucide-react';
+import { ArrowLeft, Share2, Eye, MessageCircle, Heart, Repeat } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface VideoData {

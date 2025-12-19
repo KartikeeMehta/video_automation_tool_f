@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Loader2, Play, Save, RefreshCw, AlertCircle, Wand2, ArrowLeft } from 'lucide-react';
+import { Sparkles, Loader2, Play, Save, AlertCircle, Wand2, ArrowLeft } from 'lucide-react';
 
 export default function GenerateVideo() {
   const { user } = useAuth();

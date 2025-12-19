@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Instagram, Facebook, Link as LinkIcon, AlertCircle, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
+import { Instagram, Facebook, AlertCircle, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -30,7 +30,6 @@ export default function Connections() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [accounts, setAccounts] = useState<SocialAccount[]>([]);
-  const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,8 +47,6 @@ export default function Connections() {
       setAccounts(data || []);
     } catch (error) {
       console.error('Error fetching accounts:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -101,24 +98,6 @@ export default function Connections() {
         setAccounts(accounts.filter(a => a.id !== id));
     } catch (err: any) {
         alert('Failed to disconnect: ' + err.message);
-    }
-  };
-
-  const getPlatformIcon = (platform: string) => {
-    switch (platform) {
-        case 'instagram': return <Instagram className="w-6 h-6" />;
-        case 'facebook': return <Facebook className="w-6 h-6" />;
-        case 'tiktok': return <TikTok className="w-6 h-6" />;
-        default: return <LinkIcon className="w-6 h-6" />;
-    }
-  };
-
-  const getPlatformColor = (platform: string) => {
-    switch (platform) {
-        case 'instagram': return 'bg-gradient-to-r from-purple-500 to-pink-500';
-        case 'facebook': return 'bg-blue-600';
-        case 'tiktok': return 'bg-black border border-gray-700'; // TikTok brand is black
-        default: return 'bg-gray-700';
     }
   };
 
@@ -193,7 +172,7 @@ export default function Connections() {
   );
 }
 
-function ConnectionCard({ platform, name, icon, connectedAccount, onConnect, onDisconnect, loading, color }: any) {
+function ConnectionCard({ name, icon, connectedAccount, onConnect, onDisconnect, loading, color }: any) {
     const isConnected = !!connectedAccount;
 
     return (

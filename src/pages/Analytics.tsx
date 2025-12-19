@@ -35,14 +35,12 @@ export default function Analytics() {
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [platformData, setPlatformData] = useState<PlatformStat[]>([]);
   const [topVideos, setTopVideos] = useState<VideoData[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) fetchData();
   }, [user]);
 
   const fetchData = async () => {
-      setLoading(true);
       try {
           // 1. Fetch Key Stats (Views & Likes)
           const { data: videos } = await supabase.from('videos').select('views, likes, id, title').order('views', { ascending: false });
@@ -116,8 +114,6 @@ export default function Analytics() {
 
       } catch (error) {
           console.error("Error fetching analytics:", error);
-      } finally {
-          setLoading(false);
       }
   };
 

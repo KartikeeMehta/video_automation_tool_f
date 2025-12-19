@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { LogOut, Video, Calendar, BarChart, Settings, Play, Wand2, Scissors, Menu, X, Bell, Plus, Clock } from 'lucide-react';
+import { LogOut, Video, Calendar, BarChart, Settings, Wand2, Scissors, Menu, X, Bell, Plus, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Notification {

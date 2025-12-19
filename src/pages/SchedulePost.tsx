@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Calendar, Instagram, Youtube, Clock, CheckCircle2, Repeat, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Loader2, Calendar, Instagram, Youtube, CheckCircle2, Repeat, ArrowLeft } from 'lucide-react';
 
 interface VideoData {
   id: string;
