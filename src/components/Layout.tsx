@@ -4,6 +4,7 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { 
   Video, 
   BarChart2, 
+  Link2,
   LogOut, 
   Menu, 
   X,
@@ -91,7 +92,8 @@ export default function Layout() {
           <NavItem icon={Calendar} label="Schedule" onClick={() => navigate('/schedule')} active={location.pathname === '/schedule'} />
           <NavItem icon={Clock} label="Queue" onClick={() => navigate('/scheduled-posts')} active={location.pathname === '/scheduled-posts'} />
           <NavItem icon={BarChart2} label="Analytics" onClick={() => navigate('/analytics')} active={location.pathname === '/analytics'} />
-          <NavItem icon={Settings} label="Connections" onClick={() => navigate('/connections')} active={location.pathname === '/connections'} />
+          <NavItem icon={Link2} label="Connections" onClick={() => navigate('/connections')} active={location.pathname === '/connections'} />
+          <NavItem icon={Settings} label="Settings" onClick={() => navigate('/settings')} active={location.pathname === '/settings'} />
         </nav>
 
         <div className="mt-auto pt-6 border-t border-gray-800">
@@ -217,5 +219,6 @@ function getPageTitle(path: string): string {
     if (path === '/scheduled-posts') return 'Scheduled Queue';
     if (path === '/analytics') return 'Analytics';
     if (path === '/connections') return 'Connect Accounts';
+    if (path === '/settings') return 'Settings';
     return 'Dashboard';
 }
