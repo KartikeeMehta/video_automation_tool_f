@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, Calendar, Instagram, Youtube, CheckCircle2, Repeat, ArrowLeft } from 'lucide-react';
 
 interface VideoData {
@@ -29,15 +29,24 @@ export default function SchedulePost() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [searchParams] = useSearchParams();
+  const preSelectedVideoId = searchParams.get('videoId');
+
   useEffect(() => {
     fetchLibrary();
-  }, [user]);
+  }, [user, preSelectedVideoId]);
 
   const fetchLibrary = async () => {
     const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
     if (data) {
         setVideos(data);
-        if (data.length > 0) setSelectedVideo(data[0]);
+        if (preSelectedVideoId) {
+            const found = data.find(v => v.id === preSelectedVideoId);
+            if (found) setSelectedVideo(found);
+            else if (data.length > 0) setSelectedVideo(data[0]);
+        } else if (data.length > 0) {
+            setSelectedVideo(data[0]);
+        }
     }
   };
 
