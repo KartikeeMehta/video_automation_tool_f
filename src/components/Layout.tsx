@@ -74,11 +74,8 @@ export default function Layout() {
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="flex items-center justify-between mb-10 px-2 ">
-             <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-tr from-primary-500 to-secondary-500 rounded-lg" />
-                <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-                    AutoVideo
-                </h1>
+             <div className="flex items-center gap-3 px-2">
+                <img src="/logo.png" alt="AutoVideo" className="h-8 w-auto object-contain" />
              </div>
              <button onClick={() => setMobileMenuOpen(false)} className="lg:hidden text-gray-400">
                  <X className="w-6 h-6" />
