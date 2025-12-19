@@ -21,9 +21,9 @@ export default function LandingPage() {
             {user ? (
                <Link 
                 to="/dashboard" 
-                className="px-6 py-2.5 rounded-full bg-white text-black font-semibold hover:bg-gray-200 transition"
+                 className="px-6 py-2.5 rounded-full bg-white text-black font-semibold hover:bg-gray-200 transition flex items-center gap-2"
                >
-                 Go to Dashboard
+                 Go to Dashboard <ArrowRight className="w-4 h-4" />
                </Link>
             ) : (
                 <>
