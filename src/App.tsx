@@ -11,6 +11,7 @@ import Connections from './pages/Connections';
 import VideoDetails from './pages/VideoDetails';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
+import LandingPage from './pages/LandingPage';
 import ScheduledPosts from './pages/ScheduledPosts';
 
 function App() {
@@ -18,11 +19,12 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           
           <Route element={<ProtectedRoute />}>
              <Route element={<Layout />}>
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/video/:id" element={<VideoDetails />} />
                 <Route path="/upload" element={<UploadVideo />} />
                 <Route path="/generate" element={<GenerateVideo />} />

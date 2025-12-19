@@ -73,7 +73,7 @@ export default function Layout() {
         </div>
         
         <nav className="space-y-1.5 flex-1 overflow-y-auto custom-scrollbar">
-          <NavItem icon={Video} label="My Videos" onClick={() => navigate('/')} active={location.pathname === '/'} />
+          <NavItem icon={Video} label="My Videos" onClick={() => navigate('/dashboard')} active={location.pathname === '/dashboard'} />
           <NavItem icon={Wand2} label="AI Generator" onClick={() => navigate('/generate')} active={location.pathname === '/generate'} />
           <NavItem icon={Scissors} label="Studio Editor" onClick={() => navigate('/studio')} active={location.pathname === '/studio'} />
           <NavItem icon={Calendar} label="Schedule" onClick={() => navigate('/schedule')} active={location.pathname === '/schedule'} />
@@ -197,7 +197,7 @@ function NavItem({ icon: Icon, label, active = false, onClick }: { icon: any, la
 }
 
 function getPageTitle(path: string): string {
-    if (path === '/') return 'Dashboard';
+    if (path === '/dashboard') return 'Dashboard';
     if (path.startsWith('/video')) return 'Video Details';
     if (path === '/upload') return 'Upload Video';
     if (path === '/generate') return 'AI Generator';
